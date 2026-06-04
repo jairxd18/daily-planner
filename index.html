@@ -5,50 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daily Planner</title>
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#0a1628" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Daily Planner" />
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; min-height: 100vh; }
     #root { max-width: 680px; margin: 0 auto; padding: 0 16px 100px; }
-    nav { display: flex; gap: 4px; padding: 16px 0 0; margin-bottom: 20px; border-bottom: 1px solid #e5e5e5; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    nav { display: flex; gap: 4px; padding: 16px 0 0; margin-bottom: 20px; border-bottom: 1px solid #1e3a5f; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     nav::-webkit-scrollbar { display: none; }
-    .nav-btn { background: none; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-size: 13px; color: #888; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s; }
-    .nav-btn.active { background: #f0f0f0; color: #1a1a1a; font-weight: 500; }
-    .card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
-    .metric { background: #f8f8f8; border-radius: 8px; padding: 12px 16px; flex: 1; min-width: 90px; }
-    .metric .label { font-size: 12px; color: #888; margin-bottom: 4px; }
-    .metric .value { font-size: 22px; font-weight: 500; }
+    .nav-btn { background: none; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-size: 13px; color: #7fa8d4; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s; }
+    .nav-btn.active { background: #1e3a5f; color: #ffffff; font-weight: 500; }
+    .card { background: #112240; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
+    .metric { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; flex: 1; min-width: 90px; }
+    .metric .label { font-size: 12px; color: #7fa8d4; margin-bottom: 4px; }
+    .metric .value { font-size: 22px; font-weight: 500; color: #ffffff; }
     .row { display: flex; justify-content: space-between; align-items: center; }
-    .btn { background: none; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; padding: 7px 14px; font-size: 13px; color: #1a1a1a; transition: background 0.15s; }
-    .btn:hover { background: #f5f5f5; }
-    .btn-primary { background: #1a1a1a; color: #fff; border: none; border-radius: 8px; cursor: pointer; padding: 8px 16px; font-size: 13px; font-weight: 500; }
-    .icon-btn { background: none; border: none; cursor: pointer; color: #aaa; padding: 4px; font-size: 16px; }
-    .icon-btn:hover { color: #e24b4a; }
-    .muted { font-size: 13px; color: #888; }
-    h2 { font-size: 18px; font-weight: 500; margin-bottom: 16px; }
-    h3 { font-size: 15px; font-weight: 500; margin-bottom: 12px; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .bar-bg { height: 5px; background: #eee; border-radius: 3px; }
+    .btn { background: none; border: 1px solid #1e3a5f; border-radius: 8px; cursor: pointer; padding: 7px 14px; font-size: 13px; color: #ffffff; transition: background 0.15s; }
+    .btn:hover { background: #1e3a5f; }
+    .btn-primary { background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; padding: 8px 16px; font-size: 13px; font-weight: 500; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .icon-btn { background: none; border: none; cursor: pointer; color: #7fa8d4; padding: 4px; font-size: 16px; }
+    .icon-btn:hover { color: #ef4444; }
+    .muted { font-size: 13px; color: #7fa8d4; }
+    h2 { font-size: 18px; font-weight: 500; margin-bottom: 16px; color: #ffffff; }
+    h3 { font-size: 15px; font-weight: 500; margin-bottom: 12px; color: #ffffff; }
+    .bar-bg { height: 5px; background: #1e3a5f; border-radius: 3px; }
     .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-    input, select { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 10px; background: #fff; color: #1a1a1a; appearance: none; -webkit-appearance: none; }
-    input:focus, select:focus { outline: none; border-color: #1a1a1a; }
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    input, select { width: 100%; padding: 9px 12px; border: 1px solid #1e3a5f; border-radius: 8px; font-size: 14px; margin-bottom: 10px; background: #0d1f3c; color: #ffffff; appearance: none; -webkit-appearance: none; }
+    input:focus, select:focus { outline: none; border-color: #2563eb; }
+    input::placeholder { color: #7fa8d4; }
+    select option { background: #0d1f3c; color: #ffffff; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
     .overlay.open { display: flex; }
-    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; }
+    .modal { background: #112240; border: 1px solid #1e3a5f; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .task-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .task-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #1e3a5f; }
     .task-item:last-child { border-bottom: none; }
-    .habit-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ddd; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .habit-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #1e3a5f; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
     .habit-circle.done { background: #1D9E75; border-color: #1D9E75; }
     .badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; display: inline-block; }
-    .agenda-time { background: #f8f8f8; border-radius: 8px; padding: 8px 12px; text-align: center; min-width: 52px; font-weight: 500; }
+    .agenda-time { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 8px; padding: 8px 12px; text-align: center; min-width: 52px; font-weight: 500; }
     .metrics-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .divider { border-bottom: 1px solid #1e3a5f; margin: 8px 0; }
   </style>
 </head>
 <body>
@@ -60,7 +62,7 @@
 <div class="overlay" id="modal-overlay">
   <div class="modal" id="modal-box">
     <div class="modal-header">
-      <span id="modal-title" style="font-size:16px;font-weight:500;"></span>
+      <span id="modal-title" style="font-size:16px;font-weight:500;color:#fff"></span>
       <button class="icon-btn" onclick="closeModal()"><i class="ti ti-x"></i></button>
     </div>
     <div id="modal-body"></div>
@@ -77,60 +79,59 @@ const TABS = [
   { id:"stats",     label:"Stats", icon:"ti-chart-bar" },
 ];
 const TASK_CATS = [
-  { id:"modelaje",  label:"Modelaje",           color:"#7F77DD", bg:"#EEEDFE", icon:"ti-user" },
-  { id:"trabajo",   label:"Trabajo post horario",color:"#D85A30", bg:"#FAECE7", icon:"ti-briefcase" },
-  { id:"estudios",  label:"Estudios",            color:"#1D9E75", bg:"#E1F5EE", icon:"ti-book" },
-  { id:"proyectos", label:"Proyectos",           color:"#185FA5", bg:"#E6F1FB", icon:"ti-rocket" },
+  { id:"modelaje",  label:"Modelaje",            color:"#a78bfa", bg:"#2d1b6e", icon:"ti-user" },
+  { id:"trabajo",   label:"Trabajo post horario", color:"#fb923c", bg:"#431407", icon:"ti-briefcase" },
+  { id:"estudios",  label:"Estudios",             color:"#34d399", bg:"#064e3b", icon:"ti-book" },
+  { id:"proyectos", label:"Proyectos",            color:"#60a5fa", bg:"#1e3a5f", icon:"ti-rocket" },
 ];
 const FIN_CATS = ["Alimentación","Transporte","Entretenimiento","Salud","Educación","Otros"];
-const PRIO_COLOR = { alta:"#E24B4A", media:"#EF9F27", baja:"#1D9E75" };
+const PRIO_COLOR = { alta:"#ef4444", media:"#f59e0b", baja:"#34d399" };
+const PRIO_BG    = { alta:"#450a0a", media:"#451a03", baja:"#064e3b" };
 
 const todayStr = new Date().toISOString().split("T")[0];
 const monthStr = todayStr.slice(0,7);
 
-function load(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } }
-function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+function load(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{ return d; } }
+function save(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
 
 let state = {
   tab: "dashboard",
-  tasks:   load("dp_tasks", []),
-  agenda:  load("dp_agenda", []),
-  habitos: load("dp_habitos", []),
-  gastos:  load("dp_gastos", []),
+  tasks:   load("dp_tasks",[]),
+  agenda:  load("dp_agenda",[]),
+  habitos: load("dp_habitos",[]),
+  gastos:  load("dp_gastos",[]),
 };
 
-function setState(patch) {
-  Object.assign(state, patch);
-  if (patch.tasks)   save("dp_tasks", state.tasks);
-  if (patch.agenda)  save("dp_agenda", state.agenda);
-  if (patch.habitos) save("dp_habitos", state.habitos);
-  if (patch.gastos)  save("dp_gastos", state.gastos);
+function setState(patch){
+  Object.assign(state,patch);
+  if(patch.tasks)   save("dp_tasks",state.tasks);
+  if(patch.agenda)  save("dp_agenda",state.agenda);
+  if(patch.habitos) save("dp_habitos",state.habitos);
+  if(patch.gastos)  save("dp_gastos",state.gastos);
   render();
 }
 
-function closeModal() { document.getElementById("modal-overlay").classList.remove("open"); }
-
-function openModal(title, bodyHTML) {
-  document.getElementById("modal-title").textContent = title;
-  document.getElementById("modal-body").innerHTML = bodyHTML;
+function closeModal(){ document.getElementById("modal-overlay").classList.remove("open"); }
+function openModal(title,bodyHTML){
+  document.getElementById("modal-title").textContent=title;
+  document.getElementById("modal-body").innerHTML=bodyHTML;
   document.getElementById("modal-overlay").classList.add("open");
 }
 
-function renderNav() {
-  document.getElementById("nav").innerHTML = TABS.map(t => `
+function renderNav(){
+  document.getElementById("nav").innerHTML=TABS.map(t=>`
     <button class="nav-btn ${state.tab===t.id?'active':''}" onclick="setState({tab:'${t.id}'})">
       <i class="ti ${t.icon}"></i>${t.label}
     </button>`).join("");
 }
 
-function renderDashboard() {
-  const todayAgenda = state.agenda.filter(a => a.fecha === todayStr).sort((a,b) => a.hora.localeCompare(b.hora));
-  const pendingHabits = state.habitos.filter(h => !(h.checks||[]).includes(todayStr));
-  const totalHoy = state.gastos.filter(g => g.fecha===todayStr).reduce((s,g) => s+Number(g.monto),0);
-  const doneHabits = state.habitos.filter(h => (h.checks||[]).includes(todayStr)).length;
-  const pendingTasks = state.tasks.filter(t => !t.completada).length;
-  const today = new Date();
-  const dateStr = today.toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});
+function renderDashboard(){
+  const todayAgenda=state.agenda.filter(a=>a.fecha===todayStr).sort((a,b)=>a.hora.localeCompare(b.hora));
+  const pendingHabits=state.habitos.filter(h=>!(h.checks||[]).includes(todayStr));
+  const totalHoy=state.gastos.filter(g=>g.fecha===todayStr).reduce((s,g)=>s+Number(g.monto),0);
+  const doneHabits=state.habitos.filter(h=>(h.checks||[]).includes(todayStr)).length;
+  const pendingTasks=state.tasks.filter(t=>!t.completada).length;
+  const dateStr=new Date().toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});
   return `
     <h2>Buenos días</h2>
     <p class="muted" style="margin-bottom:20px">${dateStr}</p>
@@ -141,16 +142,16 @@ function renderDashboard() {
     </div>
     <div class="card">
       <h3>Próximas actividades</h3>
-      ${todayAgenda.length===0 ? '<p class="muted">Sin actividades agendadas hoy.</p>' :
+      ${todayAgenda.length===0?'<p class="muted">Sin actividades agendadas hoy.</p>':
         todayAgenda.slice(0,3).map(a=>`
           <div class="row" style="margin-bottom:8px">
-            <span style="font-size:14px"><i class="ti ti-clock" style="margin-right:6px;color:#aaa"></i>${a.hora} — ${a.titulo}</span>
+            <span style="font-size:14px"><i class="ti ti-clock" style="margin-right:6px;color:#7fa8d4"></i>${a.hora} — ${a.titulo}</span>
             <span class="muted">${a.duracion} min</span>
           </div>`).join("")}
     </div>
     <div class="card">
       <h3>Hábitos pendientes</h3>
-      ${pendingHabits.length===0 ? '<p class="muted">¡Todos los hábitos completados!</p>' :
+      ${pendingHabits.length===0?'<p class="muted">¡Todos los hábitos completados!</p>':
         pendingHabits.slice(0,4).map(h=>`
           <div class="row" style="margin-bottom:8px">
             <span style="font-size:14px">${h.nombre}</span>
@@ -159,14 +160,14 @@ function renderDashboard() {
     </div>`;
 }
 
-function renderTareas() {
+function renderTareas(){
   return `
     <div class="row" style="margin-bottom:20px">
       <h2 style="margin:0">Tareas</h2>
       <button class="btn-primary" onclick="openAddTask()"><i class="ti ti-plus"></i> Nueva tarea</button>
     </div>
-    ${TASK_CATS.map(cat => {
-      const items = state.tasks.filter(t => t.cat===cat.id);
+    ${TASK_CATS.map(cat=>{
+      const items=state.tasks.filter(t=>t.cat===cat.id);
       return `
         <div class="card" style="margin-bottom:16px">
           <div class="row" style="margin-bottom:12px">
@@ -176,27 +177,27 @@ function renderTareas() {
             </div>
             <span class="badge" style="background:${cat.bg};color:${cat.color}">${items.length}</span>
           </div>
-          ${items.length===0 ? '<p class="muted">Sin tareas.</p>' :
+          ${items.length===0?'<p class="muted">Sin tareas.</p>':
             items.map(t=>`
               <div class="task-item">
                 <input type="checkbox" ${t.completada?'checked':''} onchange="toggleTask(${t.id})"
                   style="width:16px;height:16px;flex-shrink:0;accent-color:${cat.color};margin-bottom:0" />
-                <span style="flex:1;font-size:14px;${t.completada?'text-decoration:line-through;color:#aaa':''}">${t.titulo}</span>
-                <span class="badge" style="background:${PRIO_COLOR[t.prioridad]}22;color:${PRIO_COLOR[t.prioridad]}">${t.prioridad}</span>
+                <span style="flex:1;font-size:14px;${t.completada?'text-decoration:line-through;color:#4a6b8a':''}">${t.titulo}</span>
+                <span class="badge" style="background:${PRIO_BG[t.prioridad]};color:${PRIO_COLOR[t.prioridad]}">${t.prioridad}</span>
                 <button class="icon-btn" onclick="delTask(${t.id})"><i class="ti ti-trash"></i></button>
               </div>`).join("")}
         </div>`;
     }).join("")}`;
 }
 
-function renderAgenda() {
-  const items = state.agenda.filter(a => a.fecha===todayStr).sort((a,b)=>a.hora.localeCompare(b.hora));
+function renderAgenda(){
+  const items=state.agenda.filter(a=>a.fecha===todayStr).sort((a,b)=>a.hora.localeCompare(b.hora));
   return `
     <div class="row" style="margin-bottom:20px">
       <h2 style="margin:0">Agenda de hoy</h2>
       <button class="btn-primary" onclick="openAddAgenda()"><i class="ti ti-plus"></i> Agregar</button>
     </div>
-    ${items.length===0 ? '<p class="muted">Sin actividades para hoy.</p>' :
+    ${items.length===0?'<p class="muted">Sin actividades para hoy.</p>':
       items.map(a=>`
         <div class="card" style="display:flex;align-items:center;gap:12px">
           <div class="agenda-time">${a.hora}</div>
@@ -208,15 +209,15 @@ function renderAgenda() {
         </div>`).join("")}`;
 }
 
-function renderHabitos() {
+function renderHabitos(){
   return `
     <div class="row" style="margin-bottom:20px">
       <h2 style="margin:0">Hábitos</h2>
       <button class="btn-primary" onclick="openAddHabito()"><i class="ti ti-plus"></i> Nuevo hábito</button>
     </div>
-    ${state.habitos.length===0 ? '<p class="muted">Sin hábitos registrados.</p>' :
-      state.habitos.map(h => {
-        const done = (h.checks||[]).includes(todayStr);
+    ${state.habitos.length===0?'<p class="muted">Sin hábitos registrados.</p>':
+      state.habitos.map(h=>{
+        const done=(h.checks||[]).includes(todayStr);
         let racha=0; const d=new Date(todayStr);
         while((h.checks||[]).includes(d.toISOString().split("T")[0])){ racha++; d.setDate(d.getDate()-1); }
         return `
@@ -226,20 +227,20 @@ function renderHabitos() {
             </button>
             <div style="flex:1">
               <div style="font-weight:500;font-size:14px">${h.nombre}</div>
-              <div class="muted"><i class="ti ti-flame" style="color:#EF9F27;margin-right:4px"></i>${racha} días seguidos</div>
+              <div class="muted"><i class="ti ti-flame" style="color:#f59e0b;margin-right:4px"></i>${racha} días seguidos</div>
             </div>
             <button class="icon-btn" onclick="delHabito(${h.id})"><i class="ti ti-trash"></i></button>
           </div>`;
       }).join("")}`;
 }
 
-function renderFinanzas() {
-  const mes = state.gastos.filter(g => g.fecha?.startsWith(monthStr));
-  const hoy = state.gastos.filter(g => g.fecha===todayStr);
-  const totalMes = mes.reduce((s,g)=>s+Number(g.monto),0);
-  const totalHoy = hoy.reduce((s,g)=>s+Number(g.monto),0);
-  const presupuesto = totalMes>0 ? (totalMes*1.05).toFixed(2) : null;
-  const catTotals = FIN_CATS.map(c=>({c,v:mes.filter(g=>g.categoria===c).reduce((s,g)=>s+Number(g.monto),0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+function renderFinanzas(){
+  const mes=state.gastos.filter(g=>g.fecha?.startsWith(monthStr));
+  const hoy=state.gastos.filter(g=>g.fecha===todayStr);
+  const totalMes=mes.reduce((s,g)=>s+Number(g.monto),0);
+  const totalHoy=hoy.reduce((s,g)=>s+Number(g.monto),0);
+  const presupuesto=totalMes>0?(totalMes*1.05).toFixed(2):null;
+  const catTotals=FIN_CATS.map(c=>({c,v:mes.filter(g=>g.categoria===c).reduce((s,g)=>s+Number(g.monto),0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
   return `
     <div class="row" style="margin-bottom:20px">
       <h2 style="margin:0">Finanzas</h2>
@@ -259,14 +260,14 @@ function renderFinanzas() {
             <span style="font-size:13px">${c}</span>
             <span style="font-size:13px;font-weight:500">$${v.toFixed(2)} <span class="muted">(${totalMes>0?Math.round(v/totalMes*100):0}%)</span></span>
           </div>
-          <div class="bar-bg"><div class="bar-fill" style="width:${totalMes>0?(v/totalMes*100).toFixed(1):0}%;background:#7F77DD"></div></div>
+          <div class="bar-bg"><div class="bar-fill" style="width:${totalMes>0?(v/totalMes*100).toFixed(1):0}%;background:#2563eb"></div></div>
         </div>`).join("")}
     </div>`:''}
     <div class="card">
       <h3>Gastos recientes</h3>
       ${state.gastos.length===0?'<p class="muted">Sin gastos registrados.</p>':
         [...state.gastos].reverse().slice(0,15).map(g=>`
-          <div class="row" style="padding:8px 0;border-bottom:1px solid #f0f0f0">
+          <div class="row" style="padding:8px 0;border-bottom:1px solid #1e3a5f">
             <div>
               <div style="font-size:14px">${g.descripcion}</div>
               <div class="muted">${g.categoria} · ${g.fecha}</div>
@@ -279,11 +280,11 @@ function renderFinanzas() {
     </div>`;
 }
 
-function renderStats() {
-  const done = state.tasks.filter(t=>t.completada).length;
-  const total = state.tasks.length;
-  const habitosHoy = state.habitos.filter(h=>(h.checks||[]).includes(todayStr)).length;
-  const allGastos = state.gastos.reduce((s,g)=>s+Number(g.monto),0);
+function renderStats(){
+  const done=state.tasks.filter(t=>t.completada).length;
+  const total=state.tasks.length;
+  const habitosHoy=state.habitos.filter(h=>(h.checks||[]).includes(todayStr)).length;
+  const allGastos=state.gastos.reduce((s,g)=>s+Number(g.monto),0);
   return `
     <h2>Estadísticas</h2>
     <div class="metrics-row">
@@ -316,86 +317,85 @@ function renderStats() {
               <span style="font-size:13px">${cat}</span>
               <span style="font-size:13px;font-weight:500">$${v.toFixed(2)}</span>
             </div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${allGastos>0?(v/allGastos*100).toFixed(1):0}%;background:#185FA5"></div></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${allGastos>0?(v/allGastos*100).toFixed(1):0}%;background:#60a5fa"></div></div>
           </div>`;
       }).join("")}
       ${state.gastos.length===0?'<p class="muted">Sin datos de gastos.</p>':''}
     </div>`;
 }
 
-function render() {
+function render(){
   renderNav();
-  const map = { dashboard:renderDashboard, tareas:renderTareas, agenda:renderAgenda, habitos:renderHabitos, finanzas:renderFinanzas, stats:renderStats };
-  document.getElementById("app").innerHTML = (map[state.tab]||renderDashboard)();
+  const map={dashboard:renderDashboard,tareas:renderTareas,agenda:renderAgenda,habitos:renderHabitos,finanzas:renderFinanzas,stats:renderStats};
+  document.getElementById("app").innerHTML=(map[state.tab]||renderDashboard)();
 }
 
-// Actions
-window.toggleTask = id => { setState({ tasks: state.tasks.map(t=>t.id===id?{...t,completada:!t.completada}:t) }); };
-window.delTask    = id => { setState({ tasks: state.tasks.filter(t=>t.id!==id) }); };
-window.delAgenda  = id => { setState({ agenda: state.agenda.filter(a=>a.id!==id) }); };
-window.delHabito  = id => { setState({ habitos: state.habitos.filter(h=>h.id!==id) }); };
-window.delGasto   = id => { setState({ gastos: state.gastos.filter(g=>g.id!==id) }); };
-window.checkHabito = id => {
-  setState({ habitos: state.habitos.map(h=>{
+window.toggleTask=id=>{ setState({tasks:state.tasks.map(t=>t.id===id?{...t,completada:!t.completada}:t)}); };
+window.delTask=id=>{ setState({tasks:state.tasks.filter(t=>t.id!==id)}); };
+window.delAgenda=id=>{ setState({agenda:state.agenda.filter(a=>a.id!==id)}); };
+window.delHabito=id=>{ setState({habitos:state.habitos.filter(h=>h.id!==id)}); };
+window.delGasto=id=>{ setState({gastos:state.gastos.filter(g=>g.id!==id)}); };
+window.checkHabito=id=>{
+  setState({habitos:state.habitos.map(h=>{
     if(h.id!==id) return h;
     const checks=h.checks||[];
-    return checks.includes(todayStr) ? {...h,checks:checks.filter(c=>c!==todayStr)} : {...h,checks:[...checks,todayStr]};
+    return checks.includes(todayStr)?{...h,checks:checks.filter(c=>c!==todayStr)}:{...h,checks:[...checks,todayStr]};
   })});
 };
 
-window.openAddTask = () => openModal("Nueva tarea", `
+window.openAddTask=()=>openModal("Nueva tarea",`
   <input id="tf-titulo" placeholder="Título de la tarea" />
   <select id="tf-cat">${TASK_CATS.map(c=>`<option value="${c.id}">${c.label}</option>`).join("")}</select>
   <select id="tf-prio"><option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option></select>
   <button class="btn-primary" style="width:100%" onclick="addTask()">Agregar tarea</button>`);
 
-window.addTask = () => {
-  const titulo = document.getElementById("tf-titulo").value.trim();
+window.addTask=()=>{
+  const titulo=document.getElementById("tf-titulo").value.trim();
   if(!titulo) return;
-  setState({ tasks:[...state.tasks,{id:Date.now(),titulo,cat:document.getElementById("tf-cat").value,prioridad:document.getElementById("tf-prio").value,completada:false,fecha:todayStr}] });
+  setState({tasks:[...state.tasks,{id:Date.now(),titulo,cat:document.getElementById("tf-cat").value,prioridad:document.getElementById("tf-prio").value,completada:false,fecha:todayStr}]});
   closeModal();
 };
 
-window.openAddAgenda = () => openModal("Nueva actividad", `
+window.openAddAgenda=()=>openModal("Nueva actividad",`
   <input id="af-titulo" placeholder="Título" />
   <input id="af-hora" type="time" value="09:00" />
   <input id="af-dur" type="number" placeholder="Duración (minutos)" value="60" />
   <button class="btn-primary" style="width:100%" onclick="addAgenda()">Agregar</button>`);
 
-window.addAgenda = () => {
+window.addAgenda=()=>{
   const titulo=document.getElementById("af-titulo").value.trim();
   if(!titulo) return;
-  setState({ agenda:[...state.agenda,{id:Date.now(),titulo,hora:document.getElementById("af-hora").value,duracion:document.getElementById("af-dur").value,fecha:todayStr}] });
+  setState({agenda:[...state.agenda,{id:Date.now(),titulo,hora:document.getElementById("af-hora").value,duracion:document.getElementById("af-dur").value,fecha:todayStr}]});
   closeModal();
 };
 
-window.openAddHabito = () => openModal("Nuevo hábito", `
+window.openAddHabito=()=>openModal("Nuevo hábito",`
   <input id="hf-nombre" placeholder="Nombre del hábito" />
   <button class="btn-primary" style="width:100%" onclick="addHabito()">Agregar hábito</button>`);
 
-window.addHabito = () => {
+window.addHabito=()=>{
   const nombre=document.getElementById("hf-nombre").value.trim();
   if(!nombre) return;
-  setState({ habitos:[...state.habitos,{id:Date.now(),nombre,checks:[]}] });
+  setState({habitos:[...state.habitos,{id:Date.now(),nombre,checks:[]}]});
   closeModal();
 };
 
-window.openAddGasto = () => openModal("Registrar gasto", `
+window.openAddGasto=()=>openModal("Registrar gasto",`
   <input id="gf-desc" placeholder="Descripción" />
   <input id="gf-monto" type="number" placeholder="Monto ($)" />
   <select id="gf-cat">${FIN_CATS.map(c=>`<option>${c}</option>`).join("")}</select>
   <input id="gf-fecha" type="date" value="${todayStr}" />
   <button class="btn-primary" style="width:100%" onclick="addGasto()">Registrar</button>`);
 
-window.addGasto = () => {
+window.addGasto=()=>{
   const desc=document.getElementById("gf-desc").value.trim();
   const monto=document.getElementById("gf-monto").value;
   if(!desc||!monto) return;
-  setState({ gastos:[...state.gastos,{id:Date.now(),descripcion:desc,monto:Number(monto),categoria:document.getElementById("gf-cat").value,fecha:document.getElementById("gf-fecha").value}] });
+  setState({gastos:[...state.gastos,{id:Date.now(),descripcion:desc,monto:Number(monto),categoria:document.getElementById("gf-cat").value,fecha:document.getElementById("gf-fecha").value}]});
   closeModal();
 };
 
-document.getElementById("modal-overlay").addEventListener("click", e => { if(e.target===e.currentTarget) closeModal(); });
+document.getElementById("modal-overlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) closeModal(); });
 render();
 </script>
 </body>
