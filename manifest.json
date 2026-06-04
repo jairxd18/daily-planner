@@ -1,7 +1,7 @@
 {
   "name": "Daily Planner",
   "short_name": "Planner",
-  "start_url": "/",
+  "start_url": "/daily-planner/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1a1a1a",
