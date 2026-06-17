@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-title" content="Daily Planner" />
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #ffffff; min-height: 100vh; }
@@ -20,14 +21,18 @@
     .nav-btn { background: none; border: none; cursor: pointer; padding: 8px 14px; border-radius: 8px; font-size: 13px; color: #7fa8d4; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.15s; }
     .nav-btn.active { background: #1e3a5f; color: #ffffff; font-weight: 500; }
     .card { background: #112240; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px; }
+    .card.alert { border-color: #f59e0b; background: #1f1606; }
     .metric { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; flex: 1; min-width: 90px; }
     .metric .label { font-size: 12px; color: #7fa8d4; margin-bottom: 4px; }
     .metric .value { font-size: 22px; font-weight: 500; color: #ffffff; }
+    .metric .value.green { color: #34d399; }
+    .metric .value.red { color: #ef4444; }
     .row { display: flex; justify-content: space-between; align-items: center; }
     .btn { background: none; border: 1px solid #1e3a5f; border-radius: 8px; cursor: pointer; padding: 7px 14px; font-size: 13px; color: #ffffff; transition: background 0.15s; }
     .btn:hover { background: #1e3a5f; }
     .btn-primary { background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; padding: 8px 16px; font-size: 13px; font-weight: 500; }
     .btn-primary:hover { background: #1d4ed8; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
     .icon-btn { background: none; border: none; cursor: pointer; color: #7fa8d4; padding: 4px; font-size: 16px; }
     .icon-btn:hover { color: #ef4444; }
     .muted { font-size: 13px; color: #7fa8d4; }
@@ -39,18 +44,28 @@
     input:focus, select:focus { outline: none; border-color: #2563eb; }
     input::placeholder { color: #7fa8d4; }
     select option { background: #0d1f3c; color: #ffffff; }
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
     .overlay.open { display: flex; }
-    .modal { background: #112240; border: 1px solid #1e3a5f; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; }
+    .modal { background: #112240; border: 1px solid #1e3a5f; border-radius: 16px; padding: 24px; width: 100%; max-width: 380px; max-height: 85vh; overflow-y: auto; margin: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .task-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #1e3a5f; }
     .task-item:last-child { border-bottom: none; }
     .habit-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #1e3a5f; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
     .habit-circle.done { background: #1D9E75; border-color: #1D9E75; }
     .badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; display: inline-block; }
-    .agenda-time { background: #0d1f3c; border: 1px solid #1e3a5f; border-radius: 8px; padding: 8px 12px; text-align: center; min-width: 52px; font-weight: 500; }
-    .metrics-row { display: flex; gap: 10px; margin-bottom: 20px; }
-    .divider { border-bottom: 1px solid #1e3a5f; margin: 8px 0; }
+    .metrics-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .day-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .day-pill { padding: 6px 10px; border-radius: 8px; border: 1px solid #1e3a5f; background: #0d1f3c; color: #7fa8d4; font-size: 12px; cursor: pointer; user-select: none; }
+    .day-pill.selected { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .label-sm { font-size: 12px; color: #7fa8d4; margin-bottom: 6px; display: block; }
+    .month-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .month-nav button { background: #112240; border: 1px solid #1e3a5f; border-radius: 8px; cursor: pointer; color: #fff; padding: 6px 10px; }
+    .pie-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .pie-legend { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .export-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .export-row .btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; }
   </style>
 </head>
 <body>
@@ -70,10 +85,24 @@
 </div>
 
 <script>
+/* ===== ZONA HORARIA ECUADOR (GMT-5 fijo) ===== */
+function ecuadorNow(){
+  const utc = new Date(new Date().toUTCString());
+  return new Date(utc.getTime() - 5*60*60*1000);
+}
+function ecuadorDateStr(d = ecuadorNow()){
+  return d.toISOString().split("T")[0];
+}
+const todayStr = ecuadorDateStr();
+const monthStr = todayStr.slice(0,7);
+const todayDow = ecuadorNow().getDay(); // 0=Dom ... 6=Sáb
+
+const DOW_LABELS = ["D","L","M","M","J","V","S"];
+const DOW_NAMES  = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+
 const TABS = [
   { id:"dashboard", label:"Inicio", icon:"ti-home" },
   { id:"tareas",    label:"Tareas", icon:"ti-checkbox" },
-  { id:"agenda",    label:"Agenda", icon:"ti-calendar" },
   { id:"habitos",   label:"Hábitos", icon:"ti-repeat" },
   { id:"finanzas",  label:"Finanzas", icon:"ti-coin" },
   { id:"stats",     label:"Stats", icon:"ti-chart-bar" },
@@ -84,30 +113,44 @@ const TASK_CATS = [
   { id:"estudios",  label:"Estudios",             color:"#34d399", bg:"#064e3b", icon:"ti-book" },
   { id:"proyectos", label:"Proyectos",            color:"#60a5fa", bg:"#1e3a5f", icon:"ti-rocket" },
 ];
-const FIN_CATS = ["Alimentación","Transporte","Entretenimiento","Salud","Educación","Otros"];
 const PRIO_COLOR = { alta:"#ef4444", media:"#f59e0b", baja:"#34d399" };
 const PRIO_BG    = { alta:"#450a0a", media:"#451a03", baja:"#064e3b" };
 
-const todayStr = new Date().toISOString().split("T")[0];
-const monthStr = todayStr.slice(0,7);
+/* ===== CATEGORÍAS DE GASTOS (menú + submenú) ===== */
+const FIN_TREE = {
+  "Alimentación": ["Almuerzos de lunes a viernes","Fines de semana","Otros"],
+  "Transporte": ["Bus/metro","Uber/Taxi","Gasolina","Otros"],
+  "Entretenimiento": ["Salidas","Cine","Otros"],
+  "Educación": ["Universidad","Cursos","Otros"],
+  "Salud": ["GYM","Consultas médicas","Medicamentos","Exámenes","Otros"],
+  "Ahorros/Inversiones": ["Mi fondo","Hapi","Otros"],
+  "Suscripciones": ["Otros"],
+  "Compras": ["Casa","Golosinas","Implementos de higiene","Implementos de belleza","Ropa","Electrónica","Electrodomésticos","Habitación","Regalos","Otros"],
+};
+const FIN_CAT_COLORS = {
+  "Alimentación":"#fb923c","Transporte":"#60a5fa","Entretenimiento":"#f472b6",
+  "Educación":"#34d399","Salud":"#ef4444","Ahorros/Inversiones":"#facc15",
+  "Suscripciones":"#a78bfa","Compras":"#22d3ee",
+};
 
 function load(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{ return d; } }
 function save(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
 
 let state = {
   tab: "dashboard",
-  tasks:   load("dp_tasks",[]),
-  agenda:  load("dp_agenda",[]),
-  habitos: load("dp_habitos",[]),
-  gastos:  load("dp_gastos",[]),
+  tasks:    load("dp_tasks",[]),
+  habitos:  load("dp_habitos",[]),
+  gastos:   load("dp_gastos",[]),
+  ingresos: load("dp_ingresos",[]),
+  finMonth: monthStr,
 };
 
 function setState(patch){
   Object.assign(state,patch);
-  if(patch.tasks)   save("dp_tasks",state.tasks);
-  if(patch.agenda)  save("dp_agenda",state.agenda);
-  if(patch.habitos) save("dp_habitos",state.habitos);
-  if(patch.gastos)  save("dp_gastos",state.gastos);
+  if(patch.tasks)    save("dp_tasks",state.tasks);
+  if(patch.habitos)  save("dp_habitos",state.habitos);
+  if(patch.gastos)   save("dp_gastos",state.gastos);
+  if(patch.ingresos) save("dp_ingresos",state.ingresos);
   render();
 }
 
@@ -125,41 +168,47 @@ function renderNav(){
     </button>`).join("");
 }
 
+/* ===== DASHBOARD ===== */
 function renderDashboard(){
-  const todayAgenda=state.agenda.filter(a=>a.fecha===todayStr).sort((a,b)=>a.hora.localeCompare(b.hora));
-  const pendingHabits=state.habitos.filter(h=>!(h.checks||[]).includes(todayStr));
-  const totalHoy=state.gastos.filter(g=>g.fecha===todayStr).reduce((s,g)=>s+Number(g.monto),0);
-  const doneHabits=state.habitos.filter(h=>(h.checks||[]).includes(todayStr)).length;
-  const pendingTasks=state.tasks.filter(t=>!t.completada).length;
-  const dateStr=new Date().toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});
+  const pendingTasks = state.tasks.filter(t=>!t.completada);
+  const urgentTasks = pendingTasks.filter(t=>t.hora && t.hora <= ecuadorNow().toTimeString().slice(0,5));
+  const habitsToday = state.habitos.filter(h=>(h.dias||[]).includes(todayDow));
+  const pendingHabits = habitsToday.filter(h=>!(h.checks||[]).includes(todayStr));
+  const urgentHabits = pendingHabits.filter(h=>h.hora && h.hora <= ecuadorNow().toTimeString().slice(0,5));
+  const totalHoy = state.gastos.filter(g=>g.fecha===todayStr).reduce((s,g)=>s+Number(g.monto),0);
+  const doneHabits = habitsToday.length - pendingHabits.length;
+  const dateStr = ecuadorNow().toLocaleDateString("es-EC",{weekday:"long",day:"numeric",month:"long"});
+
   return `
     <h2>Buenos días</h2>
-    <p class="muted" style="margin-bottom:20px">${dateStr}</p>
+    <p class="muted" style="margin-bottom:20px">${dateStr} · 🇪🇨 hora Ecuador</p>
+
+    ${(urgentTasks.length>0 || urgentHabits.length>0) ? `
+      <div class="card alert">
+        <h3 style="display:flex;align-items:center;gap:6px"><i class="ti ti-alert-triangle" style="color:#f59e0b"></i>Pendientes urgentes</h3>
+        ${urgentTasks.map(t=>`<div class="row" style="margin-bottom:6px"><span style="font-size:13px">📋 ${t.titulo}</span><span class="muted">${t.hora}</span></div>`).join("")}
+        ${urgentHabits.map(h=>`<div class="row" style="margin-bottom:6px"><span style="font-size:13px">🔁 ${h.nombre}</span><span class="muted">${h.hora}</span></div>`).join("")}
+      </div>` : ''}
+
     <div class="metrics-row">
-      <div class="metric"><div class="label">Tareas pendientes</div><div class="value">${pendingTasks}</div></div>
-      <div class="metric"><div class="label">Hábitos hoy</div><div class="value">${doneHabits}/${state.habitos.length}</div></div>
+      <div class="metric"><div class="label">Tareas pendientes</div><div class="value">${pendingTasks.length}</div></div>
+      <div class="metric"><div class="label">Hábitos hoy</div><div class="value">${doneHabits}/${habitsToday.length}</div></div>
       <div class="metric"><div class="label">Gasto hoy</div><div class="value">$${totalHoy.toFixed(2)}</div></div>
     </div>
     <div class="card">
-      <h3>Próximas actividades</h3>
-      ${todayAgenda.length===0?'<p class="muted">Sin actividades agendadas hoy.</p>':
-        todayAgenda.slice(0,3).map(a=>`
-          <div class="row" style="margin-bottom:8px">
-            <span style="font-size:14px"><i class="ti ti-clock" style="margin-right:6px;color:#7fa8d4"></i>${a.hora} — ${a.titulo}</span>
-            <span class="muted">${a.duracion} min</span>
-          </div>`).join("")}
-    </div>
-    <div class="card">
-      <h3>Hábitos pendientes</h3>
-      ${pendingHabits.length===0?'<p class="muted">¡Todos los hábitos completados!</p>':
-        pendingHabits.slice(0,4).map(h=>`
-          <div class="row" style="margin-bottom:8px">
-            <span style="font-size:14px">${h.nombre}</span>
-            <button class="btn" onclick="checkHabito(${h.id})">Completar</button>
-          </div>`).join("")}
+      <h3>Hábitos de hoy (${DOW_NAMES[todayDow]})</h3>
+      ${habitsToday.length===0?'<p class="muted">No tienes hábitos programados para hoy.</p>':
+        habitsToday.map(h=>{
+          const done=(h.checks||[]).includes(todayStr);
+          return `<div class="row" style="margin-bottom:8px">
+            <span style="font-size:14px">${done?'✅':'⬜'} ${h.nombre} ${h.hora?`<span class="muted">· ${h.hora}</span>`:''}</span>
+            ${!done?`<button class="btn btn-sm" onclick="checkHabito(${h.id})">Completar</button>`:''}
+          </div>`;
+        }).join("")}
     </div>`;
 }
 
+/* ===== TAREAS ===== */
 function renderTareas(){
   return `
     <div class="row" style="margin-bottom:20px">
@@ -182,7 +231,10 @@ function renderTareas(){
               <div class="task-item">
                 <input type="checkbox" ${t.completada?'checked':''} onchange="toggleTask(${t.id})"
                   style="width:16px;height:16px;flex-shrink:0;accent-color:${cat.color};margin-bottom:0" />
-                <span style="flex:1;font-size:14px;${t.completada?'text-decoration:line-through;color:#4a6b8a':''}">${t.titulo}</span>
+                <div style="flex:1">
+                  <span style="font-size:14px;${t.completada?'text-decoration:line-through;color:#4a6b8a':''}">${t.titulo}</span>
+                  ${t.hora?`<div class="muted" style="font-size:11px"><i class="ti ti-clock"></i> ${t.hora}</div>`:''}
+                </div>
                 <span class="badge" style="background:${PRIO_BG[t.prioridad]};color:${PRIO_COLOR[t.prioridad]}">${t.prioridad}</span>
                 <button class="icon-btn" onclick="delTask(${t.id})"><i class="ti ti-trash"></i></button>
               </div>`).join("")}
@@ -190,25 +242,7 @@ function renderTareas(){
     }).join("")}`;
 }
 
-function renderAgenda(){
-  const items=state.agenda.filter(a=>a.fecha===todayStr).sort((a,b)=>a.hora.localeCompare(b.hora));
-  return `
-    <div class="row" style="margin-bottom:20px">
-      <h2 style="margin:0">Agenda de hoy</h2>
-      <button class="btn-primary" onclick="openAddAgenda()"><i class="ti ti-plus"></i> Agregar</button>
-    </div>
-    ${items.length===0?'<p class="muted">Sin actividades para hoy.</p>':
-      items.map(a=>`
-        <div class="card" style="display:flex;align-items:center;gap:12px">
-          <div class="agenda-time">${a.hora}</div>
-          <div style="flex:1">
-            <div style="font-weight:500;font-size:14px">${a.titulo}</div>
-            <div class="muted">${a.duracion} minutos</div>
-          </div>
-          <button class="icon-btn" onclick="delAgenda(${a.id})"><i class="ti ti-trash"></i></button>
-        </div>`).join("")}`;
-}
-
+/* ===== HÁBITOS ===== */
 function renderHabitos(){
   return `
     <div class="row" style="margin-bottom:20px">
@@ -218,78 +252,163 @@ function renderHabitos(){
     ${state.habitos.length===0?'<p class="muted">Sin hábitos registrados.</p>':
       state.habitos.map(h=>{
         const done=(h.checks||[]).includes(todayStr);
-        let racha=0; const d=new Date(todayStr);
-        while((h.checks||[]).includes(d.toISOString().split("T")[0])){ racha++; d.setDate(d.getDate()-1); }
+        const haceHoy=(h.dias||[]).includes(todayDow);
+        let racha=0; let d=ecuadorNow();
+        for(let i=0;i<60;i++){
+          const ds=ecuadorDateStr(d);
+          const dow=d.getDay();
+          if((h.dias||[]).includes(dow)){
+            if((h.checks||[]).includes(ds)) racha++;
+            else break;
+          }
+          d=new Date(d.getTime()-24*60*60*1000);
+        }
         return `
-          <div class="card" style="display:flex;align-items:center;gap:12px">
-            <button class="habit-circle ${done?'done':''}" onclick="checkHabito(${h.id})">
-              ${done?'<i class="ti ti-check" style="color:#fff;font-size:14px"></i>':''}
-            </button>
-            <div style="flex:1">
-              <div style="font-weight:500;font-size:14px">${h.nombre}</div>
-              <div class="muted"><i class="ti ti-flame" style="color:#f59e0b;margin-right:4px"></i>${racha} días seguidos</div>
+          <div class="card">
+            <div class="row" style="margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:12px;flex:1">
+                <button class="habit-circle ${done?'done':''}" onclick="checkHabito(${h.id})" ${!haceHoy?'style="opacity:0.3"':''}>
+                  ${done?'<i class="ti ti-check" style="color:#fff;font-size:14px"></i>':''}
+                </button>
+                <div>
+                  <div style="font-weight:500;font-size:14px">${h.nombre}</div>
+                  <div class="muted">
+                    <i class="ti ti-flame" style="color:#f59e0b;margin-right:4px"></i>${racha} días seguidos
+                    ${h.hora?` · <i class="ti ti-clock"></i> ${h.hora}`:''}
+                  </div>
+                </div>
+              </div>
+              <button class="icon-btn" onclick="delHabito(${h.id})"><i class="ti ti-trash"></i></button>
             </div>
-            <button class="icon-btn" onclick="delHabito(${h.id})"><i class="ti ti-trash"></i></button>
+            <div class="muted" style="font-size:11px">${(h.dias||[]).sort().map(d=>DOW_LABELS[d]).join(" · ")||'Sin días asignados'}</div>
           </div>`;
       }).join("")}`;
 }
 
+/* ===== FINANZAS ===== */
+function monthLabel(ym){
+  const [y,m]=ym.split("-");
+  const d=new Date(Number(y),Number(m)-1,1);
+  return d.toLocaleDateString("es-EC",{month:"long",year:"numeric"});
+}
+function shiftMonth(ym,delta){
+  const [y,m]=ym.split("-").map(Number);
+  const d=new Date(y,m-1+delta,1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
 function renderFinanzas(){
-  const mes=state.gastos.filter(g=>g.fecha?.startsWith(monthStr));
-  const hoy=state.gastos.filter(g=>g.fecha===todayStr);
-  const totalMes=mes.reduce((s,g)=>s+Number(g.monto),0);
-  const totalHoy=hoy.reduce((s,g)=>s+Number(g.monto),0);
-  const presupuesto=totalMes>0?(totalMes*1.05).toFixed(2):null;
-  const catTotals=FIN_CATS.map(c=>({c,v:mes.filter(g=>g.categoria===c).reduce((s,g)=>s+Number(g.monto),0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const ym = state.finMonth;
+  const mesGastos = state.gastos.filter(g=>g.fecha?.startsWith(ym));
+  const mesIngresos = state.ingresos.filter(i=>i.fecha?.startsWith(ym));
+  const totalIngresoMes = mesIngresos.reduce((s,i)=>s+Number(i.monto),0);
+  const totalGastoMes = mesGastos.reduce((s,g)=>s+Number(g.monto),0);
+  const balance = totalIngresoMes - totalGastoMes;
+  const totalHoy = state.gastos.filter(g=>g.fecha===todayStr).reduce((s,g)=>s+Number(g.monto),0);
+
+  const catTotals = Object.keys(FIN_TREE).map(cat=>({
+    cat, v: mesGastos.filter(g=>g.categoria===cat).reduce((s,g)=>s+Number(g.monto),0)
+  })).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+
+  const pieSVG = buildPieChart(catTotals, totalIngresoMes);
+
   return `
-    <div class="row" style="margin-bottom:20px">
+    <div class="row" style="margin-bottom:16px">
       <h2 style="margin:0">Finanzas</h2>
-      <button class="btn-primary" onclick="openAddGasto()"><i class="ti ti-plus"></i> Registrar gasto</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" onclick="openAddIngreso()"><i class="ti ti-plus"></i> Ingreso</button>
+        <button class="btn-primary btn-sm" onclick="openAddGasto()"><i class="ti ti-plus"></i> Gasto</button>
+      </div>
     </div>
+
+    <div class="month-nav">
+      <button onclick="setState({finMonth: shiftMonth(state.finMonth,-1)})"><i class="ti ti-chevron-left"></i></button>
+      <span style="font-weight:500;text-transform:capitalize">${monthLabel(ym)}</span>
+      <button onclick="setState({finMonth: shiftMonth(state.finMonth,1)})"><i class="ti ti-chevron-right"></i></button>
+    </div>
+
     <div class="metrics-row">
+      <div class="metric"><div class="label">Ingreso del mes</div><div class="value green">$${totalIngresoMes.toFixed(2)}</div></div>
+      <div class="metric"><div class="label">Gasto del mes</div><div class="value red">$${totalGastoMes.toFixed(2)}</div></div>
+      <div class="metric"><div class="label">Balance</div><div class="value ${balance>=0?'green':'red'}">$${balance.toFixed(2)}</div></div>
       <div class="metric"><div class="label">Gasto hoy</div><div class="value">$${totalHoy.toFixed(2)}</div></div>
-      <div class="metric"><div class="label">Gasto del mes</div><div class="value">$${totalMes.toFixed(2)}</div></div>
-      ${presupuesto?`<div class="metric"><div class="label">Presupuesto sugerido</div><div class="value">$${presupuesto}</div></div>`:''}
     </div>
+
     ${catTotals.length>0?`
     <div class="card" style="margin-bottom:16px">
-      <h3>Desglose del mes</h3>
-      ${catTotals.map(({c,v})=>`
-        <div style="margin-bottom:10px">
-          <div class="row" style="margin-bottom:4px">
-            <span style="font-size:13px">${c}</span>
-            <span style="font-size:13px;font-weight:500">$${v.toFixed(2)} <span class="muted">(${totalMes>0?Math.round(v/totalMes*100):0}%)</span></span>
-          </div>
-          <div class="bar-bg"><div class="bar-fill" style="width:${totalMes>0?(v/totalMes*100).toFixed(1):0}%;background:#2563eb"></div></div>
-        </div>`).join("")}
+      <h3>Distribución del mes</h3>
+      ${pieSVG}
     </div>`:''}
+
+    <div class="export-row">
+      <button class="btn" onclick="exportCSV()"><i class="ti ti-file-spreadsheet"></i> Exportar Excel (CSV)</button>
+      <button class="btn" onclick="exportPDF()"><i class="ti ti-file-text"></i> Exportar PDF</button>
+    </div>
+
     <div class="card">
-      <h3>Gastos recientes</h3>
-      ${state.gastos.length===0?'<p class="muted">Sin gastos registrados.</p>':
-        [...state.gastos].reverse().slice(0,15).map(g=>`
-          <div class="row" style="padding:8px 0;border-bottom:1px solid #1e3a5f">
-            <div>
-              <div style="font-size:14px">${g.descripcion}</div>
-              <div class="muted">${g.categoria} · ${g.fecha}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-weight:500">$${Number(g.monto).toFixed(2)}</span>
-              <button class="icon-btn" onclick="delGasto(${g.id})"><i class="ti ti-trash"></i></button>
-            </div>
-          </div>`).join("")}
+      <h3>Movimientos de ${monthLabel(ym)}</h3>
+      ${(mesGastos.length===0 && mesIngresos.length===0)?'<p class="muted">Sin movimientos este mes.</p>':
+        [...mesIngresos.map(i=>({...i,tipo:'ingreso'})), ...mesGastos.map(g=>({...g,tipo:'gasto'}))]
+          .sort((a,b)=>b.fecha.localeCompare(a.fecha))
+          .map(m=>`
+            <div class="row" style="padding:8px 0;border-bottom:1px solid #1e3a5f">
+              <div>
+                <div style="font-size:14px">${m.tipo==='ingreso'?'💰 '+(m.descripcion||'Ingreso'):m.descripcion}</div>
+                <div class="muted">${m.tipo==='ingreso'?'Ingreso':(m.categoria+(m.subcategoria?' · '+m.subcategoria:''))} · ${m.fecha}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-weight:500;color:${m.tipo==='ingreso'?'#34d399':'#fff'}">${m.tipo==='ingreso'?'+':'-'}$${Number(m.monto).toFixed(2)}</span>
+                <button class="icon-btn" onclick="${m.tipo==='ingreso'?'delIngreso':'delGasto'}(${m.id})"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>`).join("")}
     </div>`;
 }
 
+function buildPieChart(catTotals, ingreso){
+  const total = catTotals.reduce((s,c)=>s+c.v,0);
+  if(total===0) return '<p class="muted">Sin gastos registrados este mes.</p>';
+  const size=200, cx=size/2, cy=size/2, r=size/2-4;
+  let angleStart=-90;
+  let paths="";
+  catTotals.forEach(({cat,v})=>{
+    const pct = v/total;
+    const angleEnd = angleStart + pct*360;
+    const large = pct>0.5 ? 1 : 0;
+    const x1 = cx + r*Math.cos(angleStart*Math.PI/180);
+    const y1 = cy + r*Math.sin(angleStart*Math.PI/180);
+    const x2 = cx + r*Math.cos(angleEnd*Math.PI/180);
+    const y2 = cy + r*Math.sin(angleEnd*Math.PI/180);
+    paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} Z" fill="${FIN_CAT_COLORS[cat]||'#888'}" />`;
+    angleStart = angleEnd;
+  });
+  const legend = catTotals.map(({cat,v})=>`
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${FIN_CAT_COLORS[cat]||'#888'}"></div>
+      <span style="flex:1">${cat}</span>
+      <span class="muted">$${v.toFixed(2)} (${Math.round(v/total*100)}%)</span>
+    </div>`).join("");
+  return `
+    <div class="pie-wrap">
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        ${paths}
+        <circle cx="${cx}" cy="${cy}" r="${r*0.55}" fill="#112240" />
+        <text x="${cx}" y="${cy-6}" text-anchor="middle" fill="#7fa8d4" font-size="10">Ingreso</text>
+        <text x="${cx}" y="${cy+12}" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">$${ingreso.toFixed(0)}</text>
+      </svg>
+      <div class="pie-legend">${legend}</div>
+    </div>`;
+}
+
+/* ===== STATS ===== */
 function renderStats(){
   const done=state.tasks.filter(t=>t.completada).length;
   const total=state.tasks.length;
-  const habitosHoy=state.habitos.filter(h=>(h.checks||[]).includes(todayStr)).length;
-  const allGastos=state.gastos.reduce((s,g)=>s+Number(g.monto),0);
+  const habitsToday=state.habitos.filter(h=>(h.dias||[]).includes(todayDow));
+  const habitosHoy=habitsToday.filter(h=>(h.checks||[]).includes(todayStr)).length;
   return `
     <h2>Estadísticas</h2>
     <div class="metrics-row">
       <div class="metric"><div class="label">Tareas completadas</div><div class="value">${done}</div><div class="muted">${total>0?Math.round(done/total*100):0}% del total</div></div>
-      <div class="metric"><div class="label">Hábitos hoy</div><div class="value">${habitosHoy}/${state.habitos.length}</div><div class="muted">${state.habitos.length>0?Math.round(habitosHoy/state.habitos.length*100):0}% cumplidos</div></div>
+      <div class="metric"><div class="label">Hábitos hoy</div><div class="value">${habitosHoy}/${habitsToday.length}</div></div>
     </div>
     <div class="card">
       <h3>Tareas por categoría</h3>
@@ -305,36 +424,41 @@ function renderStats(){
             <div class="bar-bg"><div class="bar-fill" style="width:${n>0?(d/n*100).toFixed(1):0}%;background:${cat.color}"></div></div>
           </div>`;
       }).join("")}
-    </div>
-    <div class="card">
-      <h3>Gastos por categoría</h3>
-      ${FIN_CATS.map(cat=>{
-        const v=state.gastos.filter(g=>g.categoria===cat).reduce((s,g)=>s+Number(g.monto),0);
-        if(!v) return '';
-        return `
-          <div style="margin-bottom:8px">
-            <div class="row" style="margin-bottom:3px">
-              <span style="font-size:13px">${cat}</span>
-              <span style="font-size:13px;font-weight:500">$${v.toFixed(2)}</span>
-            </div>
-            <div class="bar-bg"><div class="bar-fill" style="width:${allGastos>0?(v/allGastos*100).toFixed(1):0}%;background:#60a5fa"></div></div>
-          </div>`;
-      }).join("")}
-      ${state.gastos.length===0?'<p class="muted">Sin datos de gastos.</p>':''}
     </div>`;
 }
 
 function render(){
   renderNav();
-  const map={dashboard:renderDashboard,tareas:renderTareas,agenda:renderAgenda,habitos:renderHabitos,finanzas:renderFinanzas,stats:renderStats};
+  const map={dashboard:renderDashboard,tareas:renderTareas,habitos:renderHabitos,finanzas:renderFinanzas,stats:renderStats};
   document.getElementById("app").innerHTML=(map[state.tab]||renderDashboard)();
 }
 
+/* ===== ACCIONES: TAREAS ===== */
 window.toggleTask=id=>{ setState({tasks:state.tasks.map(t=>t.id===id?{...t,completada:!t.completada}:t)}); };
 window.delTask=id=>{ setState({tasks:state.tasks.filter(t=>t.id!==id)}); };
-window.delAgenda=id=>{ setState({agenda:state.agenda.filter(a=>a.id!==id)}); };
-window.delHabito=id=>{ setState({habitos:state.habitos.filter(h=>h.id!==id)}); };
-window.delGasto=id=>{ setState({gastos:state.gastos.filter(g=>g.id!==id)}); };
+
+window.openAddTask=()=>openModal("Nueva tarea",`
+  <input id="tf-titulo" placeholder="Título de la tarea" />
+  <select id="tf-cat">${TASK_CATS.map(c=>`<option value="${c.id}">${c.label}</option>`).join("")}</select>
+  <select id="tf-prio"><option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option></select>
+  <span class="label-sm">Hora de recordatorio (opcional)</span>
+  <input id="tf-hora" type="time" />
+  <button class="btn-primary" style="width:100%" onclick="addTask()">Agregar tarea</button>`);
+
+window.addTask=()=>{
+  const titulo=document.getElementById("tf-titulo").value.trim();
+  if(!titulo) return;
+  setState({tasks:[...state.tasks,{
+    id:Date.now(), titulo,
+    cat:document.getElementById("tf-cat").value,
+    prioridad:document.getElementById("tf-prio").value,
+    hora:document.getElementById("tf-hora").value||null,
+    completada:false, fecha:todayStr
+  }]});
+  closeModal();
+};
+
+/* ===== ACCIONES: HÁBITOS ===== */
 window.checkHabito=id=>{
   setState({habitos:state.habitos.map(h=>{
     if(h.id!==id) return h;
@@ -342,57 +466,146 @@ window.checkHabito=id=>{
     return checks.includes(todayStr)?{...h,checks:checks.filter(c=>c!==todayStr)}:{...h,checks:[...checks,todayStr]};
   })});
 };
+window.delHabito=id=>{ setState({habitos:state.habitos.filter(h=>h.id!==id)}); };
 
-window.openAddTask=()=>openModal("Nueva tarea",`
-  <input id="tf-titulo" placeholder="Título de la tarea" />
-  <select id="tf-cat">${TASK_CATS.map(c=>`<option value="${c.id}">${c.label}</option>`).join("")}</select>
-  <select id="tf-prio"><option value="media">Media</option><option value="alta">Alta</option><option value="baja">Baja</option></select>
-  <button class="btn-primary" style="width:100%" onclick="addTask()">Agregar tarea</button>`);
-
-window.addTask=()=>{
-  const titulo=document.getElementById("tf-titulo").value.trim();
-  if(!titulo) return;
-  setState({tasks:[...state.tasks,{id:Date.now(),titulo,cat:document.getElementById("tf-cat").value,prioridad:document.getElementById("tf-prio").value,completada:false,fecha:todayStr}]});
-  closeModal();
+let selectedDays = [];
+window.toggleDay=(d)=>{
+  selectedDays = selectedDays.includes(d) ? selectedDays.filter(x=>x!==d) : [...selectedDays,d];
+  document.querySelectorAll(".day-pill").forEach(el=>{
+    const dv=Number(el.dataset.day);
+    el.classList.toggle("selected", selectedDays.includes(dv));
+  });
 };
 
-window.openAddAgenda=()=>openModal("Nueva actividad",`
-  <input id="af-titulo" placeholder="Título" />
-  <input id="af-hora" type="time" value="09:00" />
-  <input id="af-dur" type="number" placeholder="Duración (minutos)" value="60" />
-  <button class="btn-primary" style="width:100%" onclick="addAgenda()">Agregar</button>`);
-
-window.addAgenda=()=>{
-  const titulo=document.getElementById("af-titulo").value.trim();
-  if(!titulo) return;
-  setState({agenda:[...state.agenda,{id:Date.now(),titulo,hora:document.getElementById("af-hora").value,duracion:document.getElementById("af-dur").value,fecha:todayStr}]});
-  closeModal();
+window.openAddHabito=()=>{
+  selectedDays=[];
+  openModal("Nuevo hábito",`
+    <input id="hf-nombre" placeholder="Nombre del hábito" />
+    <span class="label-sm">Días de la semana</span>
+    <div class="day-pills">
+      ${DOW_LABELS.map((l,i)=>`<div class="day-pill" data-day="${i}" onclick="toggleDay(${i})">${l}</div>`).join("")}
+    </div>
+    <span class="label-sm">Hora de recordatorio (opcional)</span>
+    <input id="hf-hora" type="time" />
+    <button class="btn-primary" style="width:100%" onclick="addHabito()">Agregar hábito</button>`);
 };
-
-window.openAddHabito=()=>openModal("Nuevo hábito",`
-  <input id="hf-nombre" placeholder="Nombre del hábito" />
-  <button class="btn-primary" style="width:100%" onclick="addHabito()">Agregar hábito</button>`);
 
 window.addHabito=()=>{
   const nombre=document.getElementById("hf-nombre").value.trim();
   if(!nombre) return;
-  setState({habitos:[...state.habitos,{id:Date.now(),nombre,checks:[]}]});
+  setState({habitos:[...state.habitos,{
+    id:Date.now(), nombre,
+    dias: [...selectedDays],
+    hora: document.getElementById("hf-hora").value||null,
+    checks:[]
+  }]});
   closeModal();
 };
 
-window.openAddGasto=()=>openModal("Registrar gasto",`
-  <input id="gf-desc" placeholder="Descripción" />
-  <input id="gf-monto" type="number" placeholder="Monto ($)" />
-  <select id="gf-cat">${FIN_CATS.map(c=>`<option>${c}</option>`).join("")}</select>
-  <input id="gf-fecha" type="date" value="${todayStr}" />
-  <button class="btn-primary" style="width:100%" onclick="addGasto()">Registrar</button>`);
+/* ===== ACCIONES: FINANZAS ===== */
+window.delGasto=id=>{ setState({gastos:state.gastos.filter(g=>g.id!==id)}); };
+window.delIngreso=id=>{ setState({ingresos:state.ingresos.filter(i=>i.id!==id)}); };
+window.shiftMonth=shiftMonth;
+
+window.openAddIngreso=()=>openModal("Registrar ingreso",`
+  <input id="if-desc" placeholder="Descripción (ej. Sueldo, Extra)" />
+  <input id="if-monto" type="number" placeholder="Monto ($)" />
+  <input id="if-fecha" type="date" value="${todayStr}" />
+  <button class="btn-primary" style="width:100%" onclick="addIngreso()">Registrar ingreso</button>`);
+
+window.addIngreso=()=>{
+  const desc=document.getElementById("if-desc").value.trim();
+  const monto=document.getElementById("if-monto").value;
+  if(!desc||!monto) return;
+  setState({ingresos:[...state.ingresos,{id:Date.now(),descripcion:desc,monto:Number(monto),fecha:document.getElementById("if-fecha").value}]});
+  closeModal();
+};
+
+window.updateSubcats=()=>{
+  const cat=document.getElementById("gf-cat").value;
+  const subSel=document.getElementById("gf-subcat");
+  subSel.innerHTML = FIN_TREE[cat].map(s=>`<option value="${s}">${s}</option>`).join("");
+  toggleOtherField();
+};
+window.toggleOtherField=()=>{
+  const sub=document.getElementById("gf-subcat").value;
+  const otherWrap=document.getElementById("gf-other-wrap");
+  otherWrap.style.display = sub==="Otros" ? "block" : "none";
+};
+
+window.openAddGasto=()=>{
+  const firstCat=Object.keys(FIN_TREE)[0];
+  openModal("Registrar gasto",`
+    <input id="gf-desc" placeholder="Descripción" />
+    <input id="gf-monto" type="number" placeholder="Monto ($)" />
+    <span class="label-sm">Categoría</span>
+    <select id="gf-cat" onchange="updateSubcats()">${Object.keys(FIN_TREE).map(c=>`<option value="${c}">${c}</option>`).join("")}</select>
+    <span class="label-sm">Origen</span>
+    <select id="gf-subcat" onchange="toggleOtherField()">${FIN_TREE[firstCat].map(s=>`<option value="${s}">${s}</option>`).join("")}</select>
+    <div id="gf-other-wrap" style="display:none">
+      <input id="gf-other" placeholder="Especifique el origen" />
+    </div>
+    <input id="gf-fecha" type="date" value="${todayStr}" />
+    <button class="btn-primary" style="width:100%" onclick="addGasto()">Registrar</button>`);
+};
 
 window.addGasto=()=>{
   const desc=document.getElementById("gf-desc").value.trim();
   const monto=document.getElementById("gf-monto").value;
+  const cat=document.getElementById("gf-cat").value;
+  let sub=document.getElementById("gf-subcat").value;
+  if(sub==="Otros"){
+    const other=document.getElementById("gf-other").value.trim();
+    if(other) sub = other;
+  }
   if(!desc||!monto) return;
-  setState({gastos:[...state.gastos,{id:Date.now(),descripcion:desc,monto:Number(monto),categoria:document.getElementById("gf-cat").value,fecha:document.getElementById("gf-fecha").value}]});
+  setState({gastos:[...state.gastos,{
+    id:Date.now(), descripcion:desc, monto:Number(monto),
+    categoria:cat, subcategoria:sub,
+    fecha:document.getElementById("gf-fecha").value
+  }]});
   closeModal();
+};
+
+/* ===== EXPORTAR ===== */
+window.exportCSV=()=>{
+  const ym=state.finMonth;
+  const rows=[["Tipo","Descripción","Categoría","Origen","Monto","Fecha"]];
+  state.ingresos.filter(i=>i.fecha.startsWith(ym)).forEach(i=>rows.push(["Ingreso",i.descripcion,"","",i.monto,i.fecha]));
+  state.gastos.filter(g=>g.fecha.startsWith(ym)).forEach(g=>rows.push(["Gasto",g.descripcion,g.categoria,g.subcategoria||"",g.monto,g.fecha]));
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=`gastos_${ym}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+};
+
+window.exportPDF=()=>{
+  const ym=state.finMonth;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(`Reporte de Finanzas - ${monthLabel(ym)}`, 14, 18);
+  doc.setFontSize(10);
+  let y=30;
+  const ingresosMes=state.ingresos.filter(i=>i.fecha.startsWith(ym));
+  const gastosMes=state.gastos.filter(g=>g.fecha.startsWith(ym));
+  const totalIng=ingresosMes.reduce((s,i)=>s+Number(i.monto),0);
+  const totalGas=gastosMes.reduce((s,g)=>s+Number(g.monto),0);
+  doc.text(`Ingreso total: $${totalIng.toFixed(2)}`, 14, y); y+=6;
+  doc.text(`Gasto total: $${totalGas.toFixed(2)}`, 14, y); y+=6;
+  doc.text(`Balance: $${(totalIng-totalGas).toFixed(2)}`, 14, y); y+=10;
+  doc.setFont(undefined,"bold");
+  doc.text("Ingresos", 14, y); y+=6;
+  doc.setFont(undefined,"normal");
+  ingresosMes.forEach(i=>{ doc.text(`${i.fecha}  ${i.descripcion}  $${Number(i.monto).toFixed(2)}`,14,y); y+=6; if(y>270){doc.addPage();y=20;} });
+  y+=4;
+  doc.setFont(undefined,"bold");
+  doc.text("Gastos", 14, y); y+=6;
+  doc.setFont(undefined,"normal");
+  gastosMes.forEach(g=>{ doc.text(`${g.fecha}  ${g.descripcion} (${g.categoria}/${g.subcategoria})  $${Number(g.monto).toFixed(2)}`,14,y); y+=6; if(y>270){doc.addPage();y=20;} });
+  doc.save(`reporte_${ym}.pdf`);
 };
 
 document.getElementById("modal-overlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) closeModal(); });
