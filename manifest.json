@@ -3,8 +3,8 @@
   "short_name": "Planner",
   "start_url": "/daily-planner/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a1a1a",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "icon.png",
